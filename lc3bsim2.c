@@ -490,11 +490,15 @@ void process_instruction(){
     
 
     case 0x2: { //LDB 
+      int dr = (instruction >> 9) & 0x7;
+      int baseR = (instruction >> 6) & 0x7;
 
       break;
     }
 
     case 0x6: { //LDW 
+      int dr = (instruction >> 9) & 0x7;
+      int baseR = (instruction >> 6) & 0x7;
 
       break;
     }
@@ -509,10 +513,24 @@ void process_instruction(){
     }
 //no rti
     case 0xD: { //SHF 
+      int dr = (instruction >> 9) & 0x7;
+      int sr1 = (instruction >> 6) &  0x7; 
+      int amount = instruction & 0xF; 
+      int result; 
 
+      if ((instruction >> 4 & 0x1) == 0) { 
+        result = CURRENT_LATCHES.REGS[sr1] << amount; 
+      } else { 
+        if ((instruction >> 5 & 0x1) == 0) {
+          //right shift logical
+        } else { 
+            //right shift arithmetic
+          }
+      }
       break;
     }
 
+    
     case 0x3: { //STB 
 
       break;

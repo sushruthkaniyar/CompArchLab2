@@ -468,14 +468,26 @@ void process_instruction(){
     }
 
     case 0xC: { //JMP 
-
+      int baseR = (instruction >> 6) & 0x7;
+      NEXT_LATCHES.PC = Low16bits(CURRENT_LATCHES.REGS[baseR]);
       break;
     }
 
     case 0x4: { //JSR 
+      int load = incrementPC; 
+      int baseR = (instruction >> 6) & 0x7;
+      int value = instruction & 0x7FF;   
+      if (((instruction >> 11) & 0x1) == 0) { 
+        NEXT_LATCHES.PC = Low16bits(CURRENT_LATCHES.REGS[baseR]);
+      } else { 
+        NEXT_LATCHES.PC = Low16bits(((SignExtend(value, 11)) << 1) + incrementPC);
+      }
+      NEXT_LATCHES.REGS[0x7] = load; 
 
       break;
+
     }
+    
 
     case 0x2: { //LDB 
 
@@ -491,8 +503,7 @@ void process_instruction(){
       int dr = (instruction >> 9) & 0x7;
       int pcoffset = instruction & 0x1FF; 
       int result = SignExtend(pcoffset, 9) << 1; 
-      
-
+       NEXT_LATCHES.REGS[dr] =Low16bits(NEXT_LATCHES.PC + result); 
 
       break;
     }
@@ -518,6 +529,19 @@ void process_instruction(){
     }
 
     case 0x9: { //XOR 
+      int dr = (instruction >> 9) & 0x7;
+      int sr1 = (instruction >> 6) &  0x7; 
+      int sr2 = instruction & 0x7; 
+      int result; 
+
+      if ((instruction >> 5 & 0x1) == 0) { 
+        result = CURRENT_LATCHES.REGS[sr1] ^ CURRENT_LATCHES.REGS[sr2]; 
+      } else { 
+        result = CURRENT_LATCHES.REGS[sr1] ^ SignExtend(instruction & 0x1F, 5);
+      }
+
+       NEXT_LATCHES.REGS[dr] = Low16bits(result); 
+      //condition code
 
       break;
     }

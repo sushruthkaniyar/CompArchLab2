@@ -405,7 +405,12 @@ int main(int argc, char *argv[]) {
 
 /***************************************************************/
 
-
+static int SignExtend(int value, int numBits) { 
+  int mask = 1 << (numBits - 1);
+  return (value ^ mask) - mask; 
+}
+ 
+// write condition code helper 
 
 void process_instruction(){
   /*  function: process_instruction
@@ -417,4 +422,108 @@ void process_instruction(){
    *       -Update NEXT_LATCHES
    */     
 
+   int instruction = (MEMORY[CURRENT_LATCHES.PC >> 1][1] << 8) | MEMORY[CURRENT_LATCHES.PC >> 1][0] ; 
+   int incrementPC = Low16bits(CURRENT_LATCHES.PC) + 2; 
+   int opcode = (instruction >> 12) & 0xF; 
+
+   NEXT_LATCHES.PC = incrementPC; 
+
+   switch (opcode) { 
+
+    case 0x1: { //ADD 
+      int dr = (instruction >> 9) & 0x7;
+      int sr1 = (instruction >> 6) &  0x7; 
+      int sr2 = instruction & 0x7; 
+      int result;
+
+      if ((instruction >> 5 & 0x1) == 0) { 
+        result = CURRENT_LATCHES.REGS[sr1] + CURRENT_LATCHES.REGS[sr2];
+      } else { 
+        result = CURRENT_LATCHES.REGS[sr1] + SignExtend(instruction & 0x1F, 5);
+        }
+      NEXT_LATCHES.REGS[dr] = Low16bits(result); 
+      //condition code 
+      break;
+    }
+
+    case 0x5: { //AND 
+      int dr = (instruction >> 9) & 0x7;
+      int sr1 = (instruction >> 6) &  0x7; 
+      int sr2 = instruction & 0x7; 
+      int result; 
+
+      if ((instruction >> 5 & 0x1) == 0) { 
+        result = CURRENT_LATCHES.REGS[sr1] & CURRENT_LATCHES.REGS[sr2]; 
+      } else { 
+        result = CURRENT_LATCHES.REGS[sr1] & SignExtend(instruction & 0x1F, 5);
+      }
+      NEXT_LATCHES.REGS[dr] = Low16bits(result); 
+      //condition code
+      break;
+    }
+
+    case 0x0: { //BR 
+
+      break;
+    }
+
+    case 0xC: { //JMP 
+
+      break;
+    }
+
+    case 0x4: { //JSR 
+
+      break;
+    }
+
+    case 0x2: { //LDB 
+
+      break;
+    }
+
+    case 0x6: { //LDW 
+
+      break;
+    }
+
+    case 0xE: { //LEA 
+      int dr = (instruction >> 9) & 0x7;
+      int pcoffset = instruction & 0x1FF; 
+      int result = SignExtend(pcoffset, 9) << 1; 
+      
+
+
+      break;
+    }
+//no rti
+    case 0xD: { //SHF 
+
+      break;
+    }
+
+    case 0x3: { //STB 
+
+      break;
+    }
+
+    case 0x7: { //STW 
+
+      break;
+    }
+
+    case 0xF: { //TRAP 
+
+      break;
+    }
+
+    case 0x9: { //XOR 
+
+      break;
+    }
+
+    default:
+      break;
+  
+   }
 }

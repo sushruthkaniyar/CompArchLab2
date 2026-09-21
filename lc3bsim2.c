@@ -410,7 +410,29 @@ static int SignExtend(int value, int numBits) {
   return (value ^ mask) - mask; 
 }
  
-// write condition code helper 
+void setCondBitsNum(int num){
+  if(num < 0){
+    NEXT_LATCHES.N = 1;
+    NEXT_LATCHES.Z = 0;
+    NEXT_LATCHES.P = 0;
+  }
+  if(num == 0){
+    NEXT_LATCHES.N = 0;
+    NEXT_LATCHES.Z = 1;
+    NEXT_LATCHES.P = 0;
+  }
+  if(num > 0){
+    NEXT_LATCHES.N = 0;
+    NEXT_LATCHES.Z = 0;
+    NEXT_LATCHES.P = 1;
+  }
+} 
+
+void setCondBitsNZP(int n, int z, int p){
+  NEXT_LATCHES.N = n;
+  NEXT_LATCHES.Z = z;
+  NEXT_LATCHES.P = p;
+}
 
 void process_instruction(){
   /*  function: process_instruction

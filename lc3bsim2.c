@@ -451,7 +451,7 @@ void process_instruction(){
 
    NEXT_LATCHES.PC = incrementPC; 
 
-   switch (opcode) { 
+  switch (opcode) { 
 
     case 0x1: { //ADD 
       int dr = (instruction >> 9) & 0x7;
@@ -486,6 +486,20 @@ void process_instruction(){
     }
 
     case 0x0: { //BR 
+      int pcoffset9 = (instruction & 0x1FF);
+      int value = SignExtend(pcoffset9, 9);
+
+      int n = ((instruction >> 11) & 1);
+      int z = ((instruction >> 10) & 1);
+      int p = ((instruction >> 9) & 1);
+
+      int N = CURRENT_LATCHES.N;
+      int Z = CURRENT_LATCHES.Z;
+      int P = CURRENT_LATCHES.P;
+
+      if((n && N) || (z && Z) || (p && P)){
+        NEXT_LATCHES.PC = Low16bits(NEXT_LATCHES.PC + (value << 1));
+      }
 
       break;
     }
@@ -537,19 +551,23 @@ void process_instruction(){
 //no rti
     case 0xD: { //SHF 
       int dr = (instruction >> 9) & 0x7;
-      int sr1 = (instruction >> 6) &  0x7; 
+      int sr = (instruction >> 6) &  0x7; 
       int amount = instruction & 0xF; 
       int result; 
 
       if ((instruction >> 4 & 0x1) == 0) { 
-        result = CURRENT_LATCHES.REGS[sr1] << amount; 
+        result = CURRENT_LATCHES.REGS[sr] << amount; 
       } else { 
-        if ((instruction >> 5 & 0x1) == 0) {
-          //right shift logical
-        } else { 
-          //right shift arithmetic
+        if ((instruction >> 5 & 0x1) == 0) { // logical
+          unsigned int temp = Low16bits(CURRENT_LATCHES.REGS[sr]);
+          result = temp >> amount;
+        } else {
+          int temp = SignExtend(Low16bits(CURRENT_LATCHES.REGS[sr]), 16); // arithmetic 
+          result = temp >> amount;
         }
       }
+      NEXT_LATCHES.REGS[dr] = Low16bits(result);
+      setCondBitsNum(result);
       break;
     }
 
@@ -576,7 +594,9 @@ void process_instruction(){
     }
 
     case 0xF: { //TRAP 
-
+      int trapvect8 = instruction & 0xFF;
+      NEXT_LATCHES.REGS[7] = NEXT_LATCHES.PC;
+      NEXT_LATCHES.PC = Low16bits((MEMORY[trapvect8][1] << 8) | MEMORY[trapvect8][0]);
       break;
     }
 
@@ -601,5 +621,5 @@ void process_instruction(){
     default:
       break;
   
-   }
+  }
 }

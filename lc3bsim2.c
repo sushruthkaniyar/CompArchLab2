@@ -1,12 +1,8 @@
 /*
-    Remove all unnecessary lines (including this one) 
-    in this comment.
-    REFER TO THE SUBMISSION INSTRUCTION FOR DETAILS
-
-    Name 1: Full name of the first partner 
-    Name 2: Full name of the second partner
-    UTEID 1: UT EID of the first partner
-    UTEID 2: UT EID of the second partner
+	Name 1: Sanjith Raman 
+	Name 2: Sushruth Kaniyar 
+	UTEID 1: sr57298
+	UTEID 2: ssk3346
 */
 
 /***************************************************************/

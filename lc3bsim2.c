@@ -530,7 +530,7 @@ void process_instruction(){
       int dr = (instruction >> 9) & 0x7;
       int pcoffset = instruction & 0x1FF; 
       int result = SignExtend(pcoffset, 9) << 1; 
-       NEXT_LATCHES.REGS[dr] =Low16bits(NEXT_LATCHES.PC + result); 
+      NEXT_LATCHES.REGS[dr] =Low16bits(NEXT_LATCHES.PC + result); 
 
       break;
     }
@@ -547,20 +547,31 @@ void process_instruction(){
         if ((instruction >> 5 & 0x1) == 0) {
           //right shift logical
         } else { 
-            //right shift arithmetic
-          }
+          //right shift arithmetic
+        }
       }
       break;
     }
 
     
     case 0x3: { //STB 
-
+      int boffset6 = (instruction & 0x003F);
+      int BaseR = ((instruction & 0x01C0) >> 6);
+      int SR = ((instruction & 0x0700) >> 9);
+      int byte_addr = Low16bits(CURRENT_LATCHES.REGS[BaseR] + SignExtend(boffset6, 6));
+      MEMORY[byte_addr >> 1][byte_addr & 1] = (CURRENT_LATCHES.REGS[SR] & 0xFF);
       break;
     }
 
     case 0x7: { //STW 
+      int SR = ((instruction & 0x0700) >> 9);
+      int BaseR = ((instruction & 0x01C0) >> 6);
+      int boffset6 = (instruction & 0x003F);
+      int byte_addr = Low16bits(CURRENT_LATCHES.REGS[BaseR] + (SignExtend(boffset6, 6) << 1));
+      int value = Low16bits(CURRENT_LATCHES.REGS[SR]);
 
+      MEMORY[byte_addr >> 1][0] = value & 0xFF;
+      MEMORY[byte_addr >> 1][1] = (value >> 8) & 0xFF;
       break;
     }
 

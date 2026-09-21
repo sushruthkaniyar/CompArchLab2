@@ -575,14 +575,14 @@ void process_instruction(){
     case 0x3: { //STB 
       int boffset6 = (instruction & 0x003F);
       int BaseR = ((instruction & 0x01C0) >> 6);
-      int SR = ((instruction & 0x0700) >> 9);
+      int SR = ((instruction & 0x0E00) >> 9);
       int byte_addr = Low16bits(CURRENT_LATCHES.REGS[BaseR] + SignExtend(boffset6, 6));
       MEMORY[byte_addr >> 1][byte_addr & 1] = (CURRENT_LATCHES.REGS[SR] & 0xFF);
       break;
     }
 
     case 0x7: { //STW 
-      int SR = ((instruction & 0x0700) >> 9);
+      int SR = ((instruction & 0x0E00) >> 9);
       int BaseR = ((instruction & 0x01C0) >> 6);
       int boffset6 = (instruction & 0x003F);
       int byte_addr = Low16bits(CURRENT_LATCHES.REGS[BaseR] + (SignExtend(boffset6, 6) << 1));

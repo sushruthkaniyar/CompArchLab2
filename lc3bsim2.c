@@ -529,6 +529,15 @@ void process_instruction(){
     case 0x2: { //LDB 
       int dr = (instruction >> 9) & 0x7;
       int baseR = (instruction >> 6) & 0x7;
+      int offset6 = instruction & 0x3F;
+      int offset = SignExtend(offset6, 6);
+
+      int addr = Low16bits(CURRENT_LATCHES.REGS[baseR] + offset);
+      int byteVal = MEMORY[addr >> 1][addr & 1];
+      int result = SignExtend(byteVal & 0xFF, 8);
+
+      NEXT_LATCHES.REGS[dr] = Low16bits(result);
+      setCondBitsNum(result);
 
       break;
     }
@@ -536,6 +545,16 @@ void process_instruction(){
     case 0x6: { //LDW 
       int dr = (instruction >> 9) & 0x7;
       int baseR = (instruction >> 6) & 0x7;
+      int offset6 = instruction & 0x3F;
+      int offset = SignExtend(offset6, 6);
+
+      int addr = Low16bits(CURRENT_LATCHES.REGS[baseR] + (offset << 1));
+      int loByte = MEMORY[addr >> 1][0];
+      int hiByte = MEMORY[addr >> 1][1];
+      int result = (hiByte << 8) | (loByte & 0xFF);
+
+      NEXT_LATCHES.REGS[dr] = Low16bits(result);
+      setCondBitsNum(result);
 
       break;
     }

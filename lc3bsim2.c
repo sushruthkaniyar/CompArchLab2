@@ -411,17 +411,18 @@ static int SignExtend(int value, int numBits) {
 }
  
 void setCondBitsNum(int num){
-  if(num < 0){
+  int val = SignExtend(Low16bits(num), 16);
+  if(val < 0){
     NEXT_LATCHES.N = 1;
     NEXT_LATCHES.Z = 0;
     NEXT_LATCHES.P = 0;
   }
-  if(num == 0){
+  if(val == 0){
     NEXT_LATCHES.N = 0;
     NEXT_LATCHES.Z = 1;
     NEXT_LATCHES.P = 0;
   }
-  if(num > 0){
+  if(val > 0){
     NEXT_LATCHES.N = 0;
     NEXT_LATCHES.Z = 0;
     NEXT_LATCHES.P = 1;
@@ -464,7 +465,7 @@ void process_instruction(){
         result = CURRENT_LATCHES.REGS[sr1] + SignExtend(instruction & 0x1F, 5);
         }
       NEXT_LATCHES.REGS[dr] = Low16bits(result); 
-      //condition code 
+      setCondBitsNum(result); 
       break;
     }
 
@@ -480,7 +481,7 @@ void process_instruction(){
         result = CURRENT_LATCHES.REGS[sr1] & SignExtend(instruction & 0x1F, 5);
       }
       NEXT_LATCHES.REGS[dr] = Low16bits(result); 
-      //condition code
+      setCondBitsNum(result);
       break;
     }
 
@@ -581,7 +582,7 @@ void process_instruction(){
       }
 
        NEXT_LATCHES.REGS[dr] = Low16bits(result); 
-      //condition code
+      setCondBitsNum(result);
 
       break;
     }

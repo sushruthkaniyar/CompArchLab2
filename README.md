@@ -1,1 +1,1 @@
-cycle level lc3-b simulator
+instruction level lc3-b simulator
